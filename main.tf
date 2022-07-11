@@ -144,8 +144,8 @@ module "eks_blueprints" {
         "services"        = "100"
       }
 
-      #manifests_dir = "./manifests-team-red"
-      users = [data.aws_caller_identity.current.arn] #TODO replace with a proper team role - aws_iam_role.eks_access["eshop-team"] 
+      manifests_dir = "./manifests-team-eshop"
+      users = [data.aws_caller_identity.current.arn] 
     }
 
     team-game = {
@@ -191,7 +191,7 @@ module "eks_blueprints_kubernetes_addons" {
     }
     workloads = {
       path               = "envs/dev"
-      repo_url           = "https://github.com/eldarsagirovda/aws-bb-containerization.git"
+      repo_url           = "https://github.com/eldarsagirovda/aws-bb-containerization-argo.git"
       add_on_application = false
     }
   }
@@ -334,4 +334,18 @@ data "aws_ami" "bottlerocket" {
     name   = "name"
     values = ["bottlerocket-aws-k8s-${module.eks_blueprints.eks_cluster_version}-x86_64-*"]
   }
+}
+
+
+resource "helm_release" "calico" {
+  name       = "calico"
+  repository = "https://projectcalico.docs.tigera.io/charts"
+  chart      = "tigera-operator"
+  version    = "v3.23.2"
+
+  set {
+    name  = "installation.kubernetesProvider"
+    value = "EKS"
+  }
+
 }
